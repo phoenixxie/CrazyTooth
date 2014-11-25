@@ -17,15 +17,18 @@ public class Mouth extends InputAdapter {
 	public static final int TOOTH_COUNT = 10;
 	public static final Rectangle[] TEETH_POSITIONS = new Rectangle[] {
 			// haut
-			new Rectangle(66, 157, 40, 40), new Rectangle(93, 147, 40, 40),
-			new Rectangle(120, 143, 40, 40),
-			new Rectangle(147, 147, 40, 40),
-			new Rectangle(174, 157, 40, 40),
+			new Rectangle(85f, 430f, 140f, 140f),
+			new Rectangle(180f, 390f, 140f, 140f),
+			new Rectangle(275f, 375f, 140f, 140f),
+			new Rectangle(370f, 390f, 140f, 140f),
+			new Rectangle(465f, 430f, 140f, 140f),
 
 			// bas
-			new Rectangle(64, 122, 40, 40), new Rectangle(92, 114, 40, 40),
-			new Rectangle(120, 113, 40, 40), new Rectangle(147, 114, 40, 40),
-			new Rectangle(174, 120, 40, 40), };
+			new Rectangle(75f, 300f, 140f, 140f),
+			new Rectangle(175f, 275f, 140f, 140f),
+			new Rectangle(275f, 273f, 140f, 140f),
+			new Rectangle(375f, 275f, 140f, 140f),
+			new Rectangle(475f, 300f, 140f, 140f), };
 
 	public static final Texture[][] TEETH_IMAGES = {
 			// haut

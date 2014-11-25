@@ -34,16 +34,16 @@ import com.badlogic.gdx.utils.viewport.ScalingViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 
 public class CrazyTooth extends ApplicationAdapter {
-	static final float SCREEN_WIDTH = 1280;
-	static final float SCREEN_HEIGHT = 720;
+	static final float SCREEN_WIDTH = 720;
+	static final float SCREEN_HEIGHT = 1280;
 	static final float ASPECT_RATIO = (float) SCREEN_WIDTH
 			/ (float) SCREEN_HEIGHT;
 
 	static final Rectangle LSTATUS = new Rectangle(0, 640, 200, 80);
 	static final Rectangle RSTATUS = new Rectangle(1080, 640, 200, 80);
 
-	static final float FACE_W = 300;
-	static final float FACE_H = 350;
+	static final float FACE_W = 720;
+	static final float FACE_H = 968;
 
 	static final Color COLOR_BACKGROUND = new Color(0.96875f, 0.9453125f,
 			0.8515625f, 1);
@@ -98,13 +98,13 @@ public class CrazyTooth extends ApplicationAdapter {
 
 		stage.addActor(buttonReset);
 
-		faceImage = new Texture(Gdx.files.internal("images/face.png"));
+		faceImage = new Texture(Gdx.files.internal("images/face2.png"));
 
-		face_ratio = SCREEN_HEIGHT / FACE_H;
-		face_h = SCREEN_HEIGHT;
-		face_w = FACE_W * face_ratio;
-		face_x = (SCREEN_WIDTH - face_w) / 2;
-		face_y = 0;
+		face_ratio = SCREEN_WIDTH / FACE_W;
+		face_w = SCREEN_WIDTH;
+		face_h = FACE_H * face_ratio;
+		face_y = 80;
+		face_x = 0;
 
 		mouth = new Mouth(camera, face_x, face_y, face_ratio);
 

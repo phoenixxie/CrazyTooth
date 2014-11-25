@@ -67,6 +67,8 @@ public class CameraSurface extends SurfaceView implements
 			if (cameraInfo.facing == Camera.CameraInfo.CAMERA_FACING_FRONT) {
 				try {
 					camera = Camera.open(camIdx);
+//					camera.setDisplayOrientation(90);
+
 				} catch (RuntimeException e) {
 					e.printStackTrace();
 					Log.e(TAG,
@@ -84,11 +86,11 @@ public class CameraSurface extends SurfaceView implements
 
 		final List<Size> listSize = p.getSupportedPreviewSizes();
 		cameraSize = listSize.get(2);
-		Log.v(TAG, "use: width = " + cameraSize.width + " height = " + cameraSize.height);
+		Log.v(TAG, "use: width = " + cameraSize.width + " height = "
+				+ cameraSize.height);
 		p.setPreviewSize(cameraSize.width, cameraSize.height);
 		p.setPreviewFormat(ImageFormat.NV21);
 		camera.setParameters(p);
-		// camera.setDisplayOrientation(90);
 		try {
 			camera.setPreviewDisplay(this.getHolder());
 			camera.startPreview();
@@ -127,7 +129,7 @@ public class CameraSurface extends SurfaceView implements
 
 			UploadService service = new UploadService(getContext(), uuid);
 			service.start();
-			
+
 			MediaRecorder recorder = null;
 
 			while (running) {
@@ -137,7 +139,7 @@ public class CameraSurface extends SurfaceView implements
 						+ uuid
 						+ "."
 						+ System.currentTimeMillis() + ".mp4";
-				
+
 				recorder = new MediaRecorder();
 				recorder.setCamera(camera);
 				recorder.setAudioSource(MediaRecorder.AudioSource.MIC);
@@ -147,10 +149,12 @@ public class CameraSurface extends SurfaceView implements
 				recorder.setVideoEncoder(MediaRecorder.VideoEncoder.H264);
 				recorder.setOutputFile(filename);
 				recorder.setVideoFrameRate(30);
-				
+
 				recorder.setVideoSize(cameraSize.width, cameraSize.height);
 				recorder.setPreviewDisplay(CameraSurface.this.getHolder()
 						.getSurface());
+//				recorder.setOrientationHint(90);
+
 				try {
 					recorder.prepare();
 					recorder.start();
@@ -165,13 +169,13 @@ public class CameraSurface extends SurfaceView implements
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
-				
+
 				if (recorder != null) {
 					recorder.stop();
 					recorder.reset();
 					recorder.release();
 					recorder = null;
-					
+
 					service.addFile(filename);
 					camera.unlock();
 				}
