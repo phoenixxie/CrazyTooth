@@ -22,10 +22,16 @@ public class AndroidLauncher extends AndroidApplication {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+
 		AndroidApplicationConfiguration config = new AndroidApplicationConfiguration();
 		initialize(new CrazyTooth(), config);
-
+		
+//		server = new VideoServer();
+//		server.initialize();
+		
 		cameraSurface = new CameraSurface(this);
+//		cameraSurface = new CameraSurface(this, null);
+
 		this.addContentView(cameraSurface, new LayoutParams(
 				LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT));
 	}

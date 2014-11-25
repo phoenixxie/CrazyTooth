@@ -47,6 +47,7 @@ project(":android") {
 
     dependencies {
         compile project(":core")
+        compile "org.apache.httpcomponents:httpmime:4.3.6"
         compile "com.badlogicgames.gdx:gdx-backend-android:$gdxVersion"
         natives "com.badlogicgames.gdx:gdx-platform:$gdxVersion:natives-armeabi"
         natives "com.badlogicgames.gdx:gdx-platform:$gdxVersion:natives-armeabi-v7a"

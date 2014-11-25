@@ -2,6 +2,8 @@ package ca.uqac.game;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.InputAdapter;
+import com.badlogic.gdx.audio.Music;
+import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Batch;
@@ -72,13 +74,16 @@ public class Mouth extends InputAdapter {
 	public static final float EFFECT_WIDTH = 30;
 	public static final float EFFECT_HEIGHT = 30;
 
+	private static final Music soundBrush = Gdx.audio.newMusic(Gdx.files
+			.internal("sound/brushing-teeth.wav"));
+
 	private Tooth[] teeth;
 	private Rectangle range;
 	private Camera camera;
 
 	private Vector2 lastTouch;
 	private boolean isSwiping;
-	
+
 	private Texture brushImage;
 	private float brushW;
 	private float brushH;
@@ -123,7 +128,7 @@ public class Mouth extends InputAdapter {
 		range = new Rectangle(x1, y1, x2 - x1, y2 - y1);
 
 		lastTouch = new Vector2(0, 0);
-		
+
 		brushImage = new Texture("images/bas/3/peu-sale.png");
 		brushW = 40;
 		brushH = 40;
@@ -131,9 +136,19 @@ public class Mouth extends InputAdapter {
 		reset();
 	}
 
-	public void checkTime() {
+	public boolean checkTime() {
+		int left = 0;
 		for (int i = 0; i < TOOTH_COUNT; ++i) {
 			teeth[i].checkTime();
+			if (teeth[i].getState() != Tooth.STATE_LOST) {
+				++left;
+			}
+		}
+		
+		if (left == 0) {
+			return true;
+		} else {
+			return false;
 		}
 	}
 
@@ -149,14 +164,22 @@ public class Mouth extends InputAdapter {
 		for (int i = 0; i < TOOTH_COUNT; ++i) {
 			teeth[i].draw(batch);
 		}
-		
+
 		if (isSwiping) {
-			batch.draw(brushImage, lastTouch.x - brushW / 2, lastTouch.y - brushH / 2, brushW, brushH);
+			batch.draw(brushImage, lastTouch.x - brushW / 2, lastTouch.y
+					- brushH / 2, brushW, brushH);
 		}
 	}
 
 	@Override
+	public boolean touchDown(int screenX, int screenY, int pointer, int button) {
+		return false;
+	}
+
+	@Override
 	public boolean touchDragged(int screenX, int screenY, int pointer) {
+		soundBrush.play();
+		
 		Vector3 vec = new Vector3(screenX, screenY, 0);
 		camera.unproject(vec);
 
@@ -185,8 +208,10 @@ public class Mouth extends InputAdapter {
 								lastTouch.x, lastTouch.y, x1, y2, x2, y2, null)
 						|| Intersector.intersectSegments(vec.x, vec.y,
 								lastTouch.x, lastTouch.y, x2, y1, x2, y2, null)) {
-//					System.out.println(i + " " + vec.x + "," + vec.y + " " + lastTouch.x
-//							+ "," + lastTouch.y + " " + x1 + "," + y1 + " " + x2 + "," + y2);
+					// System.out.println(i + " " + vec.x + "," + vec.y + " " +
+					// lastTouch.x
+					// + "," + lastTouch.y + " " + x1 + "," + y1 + " " + x2 +
+					// "," + y2);
 					teeth[i].brush();
 				}
 			}
@@ -198,9 +223,9 @@ public class Mouth extends InputAdapter {
 
 		return true;
 	}
-	
+
 	@Override
-	public boolean touchUp (int screenX, int screenY, int pointer, int button) {
+	public boolean touchUp(int screenX, int screenY, int pointer, int button) {
 		isSwiping = false;
 		return false;
 	}

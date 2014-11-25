@@ -1,5 +1,7 @@
 package ca.uqac.game;
 
+import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.math.Rectangle;
@@ -20,6 +22,9 @@ public class Tooth {
 	public static final int STATE_TERRIBLE = 2;
 	public static final int STATE_DEAD = 3;
 	public static final int STATE_LOST = 4;
+	
+	private static final Music soundLostTooth = Gdx.audio.newMusic(Gdx.files
+			.internal("sound/cartoon-male-crying.wav"));
 
 	private int state;
 	private long lastStateTime;
@@ -60,6 +65,10 @@ public class Tooth {
 
 		++state;
 		lastStateTime = now;
+		
+		if (state == STATE_LOST) {
+			soundLostTooth.play();
+		}
 		return true;
 	}
 

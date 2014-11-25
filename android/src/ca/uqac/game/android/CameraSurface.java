@@ -1,12 +1,18 @@
 package ca.uqac.game.android;
 
+import java.io.File;
+import java.io.FileDescriptor;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.List;
+import java.util.UUID;
 
 import android.content.Context;
 import android.graphics.ImageFormat;
 import android.hardware.Camera;
 import android.hardware.Camera.Size;
+import android.media.CamcorderProfile;
 import android.media.MediaRecorder;
 import android.os.Environment;
 import android.util.Log;
@@ -17,7 +23,11 @@ public class CameraSurface extends SurfaceView implements
 		SurfaceHolder.Callback {
 	private static final String TAG = "CameraSurface";
 	private Camera camera;
-	private MediaRecorder recorder;
+	private Size cameraSize;
+
+	static boolean running = true;
+
+	Thread recordThread;
 
 	public CameraSurface(Context context) {
 		super(context);
@@ -65,7 +75,7 @@ public class CameraSurface extends SurfaceView implements
 				}
 			}
 		}
-		
+
 		if (camera == null) {
 			return;
 		}
@@ -73,9 +83,9 @@ public class CameraSurface extends SurfaceView implements
 		Camera.Parameters p = camera.getParameters();
 
 		final List<Size> listSize = p.getSupportedPreviewSizes();
-		Size size = listSize.get(2);
-		Log.v(TAG, "use: width = " + size.width + " height = " + size.height);
-		p.setPreviewSize(size.width, size.height);
+		cameraSize = listSize.get(2);
+		Log.v(TAG, "use: width = " + cameraSize.width + " height = " + cameraSize.height);
+		p.setPreviewSize(cameraSize.width, cameraSize.height);
 		p.setPreviewFormat(ImageFormat.NV21);
 		camera.setParameters(p);
 		// camera.setDisplayOrientation(90);
@@ -89,37 +99,83 @@ public class CameraSurface extends SurfaceView implements
 
 		camera.unlock();
 
-		recorder = new MediaRecorder();
-		recorder.setCamera(camera);
-		recorder.setAudioSource(MediaRecorder.AudioSource.MIC);
-		recorder.setVideoSource(MediaRecorder.VideoSource.CAMERA);
-		recorder.setOutputFormat(MediaRecorder.OutputFormat.MPEG_4);
-		recorder.setAudioEncoder(MediaRecorder.AudioEncoder.DEFAULT);
-		recorder.setVideoEncoder(MediaRecorder.VideoEncoder.DEFAULT);
-		recorder.setOutputFile(Environment.getExternalStorageDirectory()
-				.getPath() + "/video.mp4");
-		recorder.setVideoFrameRate(30);
-		recorder.setVideoSize(size.width, size.height);
-		recorder.setPreviewDisplay(this.getHolder().getSurface());
-		try {
-			recorder.prepare();
-			recorder.start();
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
+		recordThread = new RecordThread();
+		recordThread.start();
 	}
 
 	private void release() {
+		running = false;
+		if (recordThread != null) {
+			try {
+				recordThread.join();
+			} catch (InterruptedException e) {
+			}
+		}
+
 		if (camera != null) {
 			camera.stopPreview();
 			camera.release();
 			camera = null;
 		}
+	}
 
-		if (recorder != null) {
-			recorder.stop();
-			recorder.reset();
-			recorder.release();
+	class RecordThread extends Thread {
+
+		@Override
+		public void run() {
+			String uuid = UUID.randomUUID().toString();
+
+			UploadService service = new UploadService(getContext(), uuid);
+			service.start();
+			
+			MediaRecorder recorder = null;
+
+			while (running) {
+				String filename = getContext().getExternalFilesDir(null)
+						.getPath()
+						+ "/"
+						+ uuid
+						+ "."
+						+ System.currentTimeMillis() + ".mp4";
+				
+				recorder = new MediaRecorder();
+				recorder.setCamera(camera);
+				recorder.setAudioSource(MediaRecorder.AudioSource.MIC);
+				recorder.setVideoSource(MediaRecorder.VideoSource.CAMERA);
+				recorder.setOutputFormat(MediaRecorder.OutputFormat.MPEG_4);
+				recorder.setAudioEncoder(MediaRecorder.AudioEncoder.AAC);
+				recorder.setVideoEncoder(MediaRecorder.VideoEncoder.H264);
+				recorder.setOutputFile(filename);
+				recorder.setVideoFrameRate(30);
+				
+				recorder.setVideoSize(cameraSize.width, cameraSize.height);
+				recorder.setPreviewDisplay(CameraSurface.this.getHolder()
+						.getSurface());
+				try {
+					recorder.prepare();
+					recorder.start();
+
+				} catch (Exception e) {
+					recorder = null;
+					e.printStackTrace();
+				}
+
+				try {
+					Thread.sleep(5000);
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+				
+				if (recorder != null) {
+					recorder.stop();
+					recorder.reset();
+					recorder.release();
+					recorder = null;
+					
+					service.addFile(filename);
+					camera.unlock();
+				}
+			}
 		}
 	}
 

@@ -3,6 +3,8 @@ package ca.uqac.game;
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.InputMultiplexer;
+import com.badlogic.gdx.Input.Keys;
+import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
@@ -20,6 +22,7 @@ import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.ui.Dialog;
 import com.badlogic.gdx.scenes.scene2d.ui.ImageButton;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.ImageButton.ImageButtonStyle;
@@ -47,6 +50,8 @@ public class CrazyTooth extends ApplicationAdapter {
 	static final Color COLOR_LINE = new Color(0.77734375f, 0.68359375f,
 			0.73828125f, 1);
 
+	static Music soundGameover;
+
 	private Stage stage;
 	private Viewport viewport;
 	private Camera camera;
@@ -55,6 +60,7 @@ public class CrazyTooth extends ApplicationAdapter {
 	private Skin skin;
 	private BitmapFont font;
 	private ImageButton buttonReset;
+	private Dialog dialogReset;
 
 	private Texture faceImage;
 	private float face_x;
@@ -64,6 +70,7 @@ public class CrazyTooth extends ApplicationAdapter {
 	private float face_ratio;
 
 	private Mouth mouth;
+	private boolean gameoverPlayed;
 
 	@Override
 	public void create() {
@@ -80,16 +87,17 @@ public class CrazyTooth extends ApplicationAdapter {
 		font = new BitmapFont(Gdx.files.internal("data/fonts/fonts.fnt"),
 				Gdx.files.internal("data/fonts/fonts.png"), false);
 
-		TextureRegion btnResetImage = new TextureRegion(new Texture(Gdx.files.internal("data/refresh.png")));
+		TextureRegion btnResetImage = new TextureRegion(new Texture(
+				Gdx.files.internal("data/refresh.png")));
 		ImageButtonStyle style = new ImageButtonStyle();
 		style.imageUp = new TextureRegionDrawable(btnResetImage);
 		buttonReset = new ImageButton(style);
-		
+
 		buttonReset.setX(SCREEN_WIDTH - 20 - btnResetImage.getRegionWidth());
 		buttonReset.setY(SCREEN_HEIGHT - 20 - btnResetImage.getRegionHeight());
-		
+
 		stage.addActor(buttonReset);
-		
+
 		faceImage = new Texture(Gdx.files.internal("images/face.png"));
 
 		face_ratio = SCREEN_HEIGHT / FACE_H;
@@ -100,8 +108,12 @@ public class CrazyTooth extends ApplicationAdapter {
 
 		mouth = new Mouth(camera, face_x, face_y, face_ratio);
 
+		soundGameover = Gdx.audio.newMusic(Gdx.files
+				.internal("sound/cartoon-dramatic-male-crying.wav"));
+		gameoverPlayed = false;
+
 		Gdx.input.setInputProcessor(new InputMultiplexer(stage, mouth));
-		
+
 		buttonReset.addListener(new ChangeListener() {
 
 			@Override
@@ -112,6 +124,19 @@ public class CrazyTooth extends ApplicationAdapter {
 
 		});
 
+		dialogReset = new Dialog("", skin, "dialog") {
+			protected void result(Object object) {
+				Boolean v = (Boolean) object;
+
+				if (v) {
+					gameoverPlayed = false;
+					GameManager.instance().reset();
+					mouth.reset();
+				}
+			}
+		}.text("Game over! Restart?").button("Oui!", true)
+				.button("Non!", false).key(Keys.ENTER, true)
+				.key(Keys.ESCAPE, false);
 	}
 
 	@Override
@@ -124,7 +149,7 @@ public class CrazyTooth extends ApplicationAdapter {
 
 		camera.update();
 
-		mouth.checkTime();
+		boolean isGameover = mouth.checkTime();
 
 		batch.setProjectionMatrix(camera.combined);
 		batch.begin();
@@ -140,8 +165,17 @@ public class CrazyTooth extends ApplicationAdapter {
 		// renderer.rect(RSTATUS.x, RSTATUS.y, RSTATUS.width, RSTATUS.height);
 
 		renderer.end();
-		
+
+		stage.act(Math.min(Gdx.graphics.getDeltaTime(), 1f / 30f));
 		stage.draw();
+		
+		if (isGameover) {
+			if (!gameoverPlayed) {
+				soundGameover.play();
+				dialogReset.show(stage);
+				gameoverPlayed = true;
+			}
+		}
 	}
 
 	private void drawStatus(Batch batch) {
