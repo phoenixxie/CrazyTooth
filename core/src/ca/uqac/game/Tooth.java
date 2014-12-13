@@ -5,17 +5,11 @@ import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.math.Rectangle;
-import com.badlogic.gdx.scenes.scene2d.Actor;
-import com.badlogic.gdx.scenes.scene2d.InputEvent;
-import com.badlogic.gdx.scenes.scene2d.InputListener;
-import com.badlogic.gdx.scenes.scene2d.Touchable;
 
 public class Tooth {
 	public static final int SCORES[] = { 0, 1000, 200, 0, 0 };
 	public static final int TIMES[] = { 0, 1, 2, 1, Integer.MAX_VALUE };
 	public static final int POINTS[] = { 0, 5, 2, -100, 0 };
-
-	public static final long INTERVAL_CHANGE = 4; // secondes
 
 	public static final int STATE_PERFECT = 0;
 	public static final int STATE_SLIGHT = 1;
@@ -27,7 +21,7 @@ public class Tooth {
 			.internal("sound/cartoon-male-crying.wav"));
 
 	private int state;
-	private long lastStateTime;
+	private int lastStateTime;
 	private int currTimes;
 	private Rectangle position;
 	private Texture[] textures;
@@ -48,7 +42,7 @@ public class Tooth {
 	public void reset() {
 		this.state = STATE_PERFECT;
 		this.currTimes = TIMES[0];
-		this.lastStateTime = System.currentTimeMillis();
+		this.lastStateTime = GameManager.instance().getDuration();
 	}
 
 	public boolean checkTime() {
@@ -56,10 +50,10 @@ public class Tooth {
 			return false;
 		}
 
-		long now = System.currentTimeMillis();
-		long diff = (now - lastStateTime) / 1000;
+		int now = GameManager.instance().getDuration();
+		int diff = now - lastStateTime;
 
-		if (diff < INTERVAL_CHANGE) {
+		if (diff < GameManager.instance().getInterval()) {
 			return false;
 		}
 
@@ -89,7 +83,7 @@ public class Tooth {
 			return false;
 		}
 
-		lastStateTime = System.currentTimeMillis();
+		lastStateTime = GameManager.instance().getDuration();
 		if (state == STATE_PERFECT) {
 			return false;
 		}

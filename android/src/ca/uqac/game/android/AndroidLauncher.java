@@ -63,18 +63,12 @@ public class AndroidLauncher extends AndroidApplication {
 	    setContentView(layout);
 	    startAdvertising(adView);
 
-		// server = new VideoServer();
-		// server.initialize();
-
-//		this.addContentView(cameraSurface, new LayoutParams(
-//				LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT));
 	}
 
 	private AdView createAdView() {
 		adView = new AdView(this);
 		adView.setAdSize(AdSize.SMART_BANNER);
 		adView.setAdUnitId("ca-app-pub-7283861277343743/2939981717");
-		// adView.setId(12345);
 		RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(
 				LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT);
 		params.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM, RelativeLayout.TRUE);

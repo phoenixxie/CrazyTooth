@@ -16,10 +16,7 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
-import com.badlogic.gdx.input.GestureDetector;
-import com.badlogic.gdx.input.GestureDetector.GestureListener;
 import com.badlogic.gdx.math.Rectangle;
-import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Dialog;
@@ -28,7 +25,6 @@ import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.ImageButton.ImageButtonStyle;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
-import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener.ChangeEvent;
 import com.badlogic.gdx.utils.Scaling;
 import com.badlogic.gdx.utils.viewport.ScalingViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
@@ -61,6 +57,8 @@ public class CrazyTooth extends ApplicationAdapter {
 	private BitmapFont font;
 	private ImageButton buttonReset;
 	private Dialog dialogReset;
+	private Dialog dialogUpgrade;
+	private Dialog dialogFinish;
 
 	private Texture faceImage;
 	private float face_x;
@@ -80,6 +78,8 @@ public class CrazyTooth extends ApplicationAdapter {
 		viewport = new ScalingViewport(Scaling.fit, SCREEN_WIDTH,
 				SCREEN_HEIGHT, camera);
 		stage = new Stage(viewport);
+
+		GameManager.instance().setActivity(this);
 
 		batch = new SpriteBatch();
 		renderer = new ShapeRenderer();
@@ -134,9 +134,30 @@ public class CrazyTooth extends ApplicationAdapter {
 					mouth.reset();
 				}
 			}
-		}.text("Game over! Restart?").button("Oui!", true)
+		}.text("Game over! Try again?").button("Oui!", true)
 				.button("Non!", false).key(Keys.ENTER, true)
 				.key(Keys.ESCAPE, false);
+
+		dialogUpgrade = new Dialog("", skin, "dialog") {
+			protected void result(Object object) {
+				GameManager.instance().resume();
+			}
+		}.text("Congratulations!\nYou have upgraded!").button("OK", true)
+				.key(Keys.ENTER, true);
+
+		dialogFinish = new Dialog("", skin, "dialog") {
+			protected void result(Object object) {
+				Boolean v = (Boolean) object;
+
+				if (v) {
+					gameoverPlayed = false;
+					GameManager.instance().reset();
+					mouth.reset();
+				}
+			}
+		}.text("Congratulations!\nYou have completed all levels!\nRestart?")
+				.button("Oui!", true).button("Non!", false)
+				.key(Keys.ENTER, true).key(Keys.ESCAPE, false);
 	}
 
 	@Override
@@ -168,7 +189,7 @@ public class CrazyTooth extends ApplicationAdapter {
 
 		stage.act(Math.min(Gdx.graphics.getDeltaTime(), 1f / 30f));
 		stage.draw();
-		
+
 		if (isGameover) {
 			if (!gameoverPlayed) {
 				soundGameover.play();
@@ -199,5 +220,25 @@ public class CrazyTooth extends ApplicationAdapter {
 	@Override
 	public void resize(int width, int height) {
 		viewport.update(width, height);
+	}
+
+	@Override
+	public void pause() {
+		GameManager.instance().pause();
+	}
+
+	@Override
+	public void resume() {
+		GameManager.instance().resume();
+	}
+	
+	public void onUpgrade() {
+		GameManager.instance().pause();
+		dialogUpgrade.show(stage);
+	}
+	
+	public void onFinish() {
+		GameManager.instance().pause();
+		dialogFinish.show(stage);
 	}
 }
