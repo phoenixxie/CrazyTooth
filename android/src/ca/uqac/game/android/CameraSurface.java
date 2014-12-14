@@ -90,7 +90,10 @@ public class CameraSurface extends SurfaceView implements
 				+ cameraSize.height);
 		p.setPreviewSize(cameraSize.width, cameraSize.height);
 		p.setPreviewFormat(ImageFormat.NV21);
+		p.set("cam_mode", 1);
+//		p.setFocusMode(Camera.Parameters.FOCUS_MODE_CONTINUOUS_VIDEO);
 		camera.setParameters(p);
+
 		try {
 			camera.setPreviewDisplay(this.getHolder());
 			camera.startPreview();
@@ -153,7 +156,7 @@ public class CameraSurface extends SurfaceView implements
 				recorder.setVideoSize(cameraSize.width, cameraSize.height);
 				recorder.setPreviewDisplay(CameraSurface.this.getHolder()
 						.getSurface());
-//				recorder.setOrientationHint(90);
+				recorder.setOrientationHint(270);
 
 				try {
 					recorder.prepare();
