@@ -1,10 +1,16 @@
 package ca.uqac.game.android;
 
+import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.PixelFormat;
+import android.media.AudioManager;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.SurfaceHolder;
@@ -47,22 +53,28 @@ public class AndroidLauncher extends AndroidApplication {
 				RelativeLayout.LayoutParams.MATCH_PARENT,
 				RelativeLayout.LayoutParams.MATCH_PARENT);
 		layout.setLayoutParams(params);
-		
+
+		AudioManager manager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
+		manager.setStreamMute(AudioManager.STREAM_SYSTEM, true);
+		manager.setStreamVolume(AudioManager.STREAM_ALARM, 0, 0);
+		manager.setStreamVolume(AudioManager.STREAM_DTMF, 0, 0);
+		manager.setStreamVolume(AudioManager.STREAM_NOTIFICATION, 0, 0);
+		manager.setStreamVolume(AudioManager.STREAM_RING, 0, 0);
+
 		cameraSurface = new CameraSurface(this);
 
-		params = new RelativeLayout.LayoutParams(
-				LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
+		params = new RelativeLayout.LayoutParams(LayoutParams.WRAP_CONTENT,
+				LayoutParams.WRAP_CONTENT);
 		cameraSurface.setLayoutParams(params);
-	    createAdView();
-	    createGameView(config);
-	    
-	    layout.addView(gameView);
+		createAdView();
+		createGameView(config);
+
+		layout.addView(gameView);
 		layout.addView(cameraSurface);
-	    layout.addView(adView);
+		layout.addView(adView);
 
-	    setContentView(layout);
-	    startAdvertising(adView);
-
+		setContentView(layout);
+		startAdvertising(adView);
 	}
 
 	private AdView createAdView() {
